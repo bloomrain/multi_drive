@@ -2,7 +2,6 @@ require 'active_support/core_ext/hash/keys'
 require 'active_support/inflector/methods'
 require 'active_support/core_ext/object/blank'
 require 'yaml'
-require 'erb'
 require 'google/api_client'
 
 module Paperclip
@@ -26,6 +25,8 @@ module Paperclip
     module MultiDrive
 
       def self.extended(base)
+        attr_accessor :credentials
+
         begin
           require 'google-api-client'
         rescue LoadError => e
@@ -34,7 +35,7 @@ module Paperclip
         end unless defined?(Google)
 
         base.instance_eval do
-          @google_drive_credentials = parse_credentials(@options[:google_drive_credentials] || {})
+          self.credentials = parse_credentials(@options[:credentials] || {})
           @google_drive_options = @options[:google_drive_options] || {}
           google_api_client # Force validations of credentials
         end
@@ -227,15 +228,15 @@ module Paperclip
         result =
             case credentials
               when File
-                YAML.load(ERB.new(File.read(credentials.path)).result)
+                YAML.load(File.read(credentials.path))
               when String, Pathname
-                YAML.load(ERB.new(File.read(credentials)).result)
+                YAML.load(File.read(credentials))
               when Hash
                 credentials
               else
                 raise ArgumentError, ":google_drive_credentials are not a path, file, nor a hash"
             end
-        result.symbolize_keys #or string keys
+        result.with_indifferent_access #or string keys
       end
       # check either all ccredentials keys is set
       def assert_required_keys
