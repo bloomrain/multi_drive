@@ -13,6 +13,15 @@ Gem::Specification.new do |spec|
   spec.homepage      = ""
   spec.license       = "MIT"
 
+
+  #gem.executables   = `git ls-files -- bin/*`.split("\n").map{ |f| File.basename(f) }
+  #gem.files         = Dir["lib/**/*"] + ["README.md", "LICENSE", "paperclip-googledrive.gemspec"]
+  #gem.test_files    = `git ls-files -- {test,spec,features}/*`.split("\n")
+
+
+  gem.required_ruby_version = ">= 1.9.2"
+
+
   spec.files         = `git ls-files`.split($/)
   spec.executables   = spec.files.grep(%r{^bin/}) { |f| File.basename(f) }
   spec.test_files    = spec.files.grep(%r{^(test|spec|features)/})
@@ -20,4 +29,9 @@ Gem::Specification.new do |spec|
 
   spec.add_development_dependency "bundler", "~> 1.3"
   spec.add_development_dependency "rake"
+
+  spec.add_dependency "paperclip", "~> 3.4"
+  spec.add_dependency 'google-api-client', "~> 0.5"
+
+  spec.add_development_dependency "rake", ">= 0.9"
 end
