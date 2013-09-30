@@ -19,7 +19,7 @@ Gem::Specification.new do |spec|
   #gem.test_files    = `git ls-files -- {test,spec,features}/*`.split("\n")
 
 
-  gem.required_ruby_version = ">= 1.9.2"
+#  gem.required_ruby_version = ">= 1.9.2"
 
 
   spec.files         = `git ls-files`.split($/)
