@@ -3,19 +3,31 @@ class MultiDrive::Client
 
   def initialize(config)
     self.clients = {}
-    config.each_pair do |api, options|
-      client_name = options[:name] || api
-      self.clients[client_name] ||= MultiDrive::ApiClient.new(:api, options)
+    config[:credentials].each do |options|
+      client_name = options[:name] || options[:api]
+      self.clients[client_name] ||= "MultiDrive::#{api.camelize}Client".constantize.new(options)
     end
   end
 
-  def random_client
+  def random
     clients.values.sample
   end
 
-  def upload_file(file, destination_path)
-    file_path = file.is_a?(File) ? file.path : file
-    shared_link = random_client.upload_file(file_path, destination_path).create_shared_link
-    shared_link.url
+  def client(name)
+    @client_by_name ||= clients.group_by(&:name).with_indifferent_access
+    @client_by_name[name]
   end
+
+  def upload_file(file, destination_path)
+    random.upload_file(file, destination_path)
+  end
+
+  def download_file(file_path)
+    random.download_file(file_path)
+  end
+
+  def delete_file(file_path)
+    random.delete_file(file_path)
+  end
+
 end
