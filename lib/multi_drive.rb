@@ -1,2 +1,3 @@
 require 'paperclip'
-require 'paperclip/multi_drive'
+require 'multi_drive/client'
+require 'paperclip/storage/multi_drive'

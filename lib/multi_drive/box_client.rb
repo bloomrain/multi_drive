@@ -1,16 +1,20 @@
+require 'ruby-box'
+
 class MultiDrive::BoxClient
-  attr_accessor :api, :primary_options
+  attr_accessor :api, :config, :name, :api_key, :client_secret, :access_token
 
   def initialize(config)
-    self.api = :box
-    self.config = config.clone
-    self.name = config[:name] || api
+    self.config = config.clone.with_indifferent_access
+    self.api = self.config[:api]
+    self.name = self.config[:name] || api
+    self.api_key = self.config[:api_key]
+    self.client_secret = self.config[:client_secret]
+    self.access_token = self.config[:access_token]
   end
 
   def upload_file(file, destination_path)
     file_path = file.is_a?(File) ? file.path : file
-    shared_link = client.upload_file(file_path, destination_path).create_shared_link
-    shared_link.url
+    client.upload_file(file_path, destination_path)
   end
 
   def download_file(file_path)
@@ -27,9 +31,9 @@ class MultiDrive::BoxClient
     @client ||= begin
       require 'ruby-box'
       session = RubyBox::Session.new({
-         client_id: config[:box][:client_id],
-         client_secret: config[:box][:client_secret],
-         access_token: config[:box][:access_token]
+         client_id: api_key,
+         client_secret: client_secret,
+         access_token: access_token
       })
 
       RubyBox::Client.new(session)

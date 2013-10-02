@@ -32,6 +32,7 @@ Gem::Specification.new do |spec|
 
   spec.add_dependency "paperclip", "~> 3.4"
   spec.add_dependency 'google-api-client', "~> 0.5"
+  spec.add_dependency 'ruby-box'
 
   spec.add_development_dependency "rake", ">= 0.9"
 end

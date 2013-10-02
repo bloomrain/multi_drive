@@ -1,10 +1,18 @@
+require 'multi_drive/box_client'
+
 class MultiDrive::Client
   attr_accessor :clients
 
-  def initialize(config)
+  def initialize(config = Rails.root.join('config', 'multi_drive.yml').to_s)
+    if config.is_a?(String)
+      config = YAML.load( File.open(config) )
+    end
+
+    config = config.clone.with_indifferent_access
     self.clients = {}
-    config[:credentials].each do |options|
-      client_name = options[:name] || options[:api]
+    config[:storages].each do |options|
+      api = options[:api]
+      client_name = options[:name] || api
       self.clients[client_name] ||= "MultiDrive::#{api.camelize}Client".constantize.new(options)
     end
   end
