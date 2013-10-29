@@ -2,7 +2,7 @@ module MultiDrive::Attachment
   def has_multi_drive_attached_file(attachment_name, options = {})
     has_attached_file attachment_name, options
 
-    serialize :multiple_drive_storage
+    serialize :multi_drive_storage
 
     define_method "#{attachment_name}_url" do |style = :original|
       public_send(attachment_name).url(style)
@@ -11,38 +11,41 @@ module MultiDrive::Attachment
     define_method :upload_to_storage! do |*styles|
       attachment = public_send(attachment_name)
       styles = attachment.styles.keys + [:original] if styles.blank?
-      storage_data = {}
-      if public_send("#{attachment_name}?")
-        attachment_file_name = public_send("#{attachment_name}_file_name")
-        api_client = multi_drive_client.random
-        styles.each do |attachment_style|
-          destination_path = attachment.url(attachment_style, false)
-          destination_path = destination_path[0, destination_path.length - attachment_file_name.length]
-          file_path = attachment.path(attachment_style)
-          sha2 =  Digest::SHA2.file(file_path).hexdigest
-          if sha2 != storage_data.try(:[], [attachment_style.to_sym]).try(:[], :api).try(:sha2)
-            storage_data[attachment_style.to_sym] = {
-              local: {
-                path: destination_path,
-                file_name: attachment_file_name
-              },
-              api: {
-                name: api_client.name,
-                path: destination_path,
-                file_name: attachment_file_name,
-                sha2: sha2,
-                uploaded_at: Time.now
-              }
-            }
-            api_client.upload_file(file_path, destination_path)
-            File.delete(attachment.path(attachment_style))
-          end
-        end
 
-        update_attributes!(multi_drive_storage: storage_data)
-      else
-        throw Exception.new("No attachment to upload")
+      storage_data = {}
+
+      throw Exception.new("No attachment to upload") unless public_send("#{attachment_name}?")
+
+      attachment_file_name = public_send("#{attachment_name}_file_name")
+      api_client = multi_drive_client.random
+      styles.each do |attachment_style|
+        destination_path = attachment.url(attachment_style, false)
+        destination_path = destination_path[0, destination_path.length - attachment_file_name.length]
+        file_path = attachment.path(attachment_style)
+
+        next unless File.exist?(file_path)
+
+        sha2 =  Digest::SHA2.file(file_path).hexdigest.to_s
+        attachment_style
+        old_sha2 = multi_drive_storage
+                  .try(:[], attachment_style.to_sym)
+                  .try(:[], :api)
+                  .try(:[], :sha2)
+
+        storage_data[attachment_style.to_sym] = {
+          local: { path: destination_path, file_name: attachment_file_name },
+          api:   { name: api_client.name, path: destination_path, 
+                   file_name: attachment_file_name,
+                   sha2: sha2, uploaded_at: Time.now }
+        }
+
+        next unless sha2 != old_sha2
+
+        api_client.upload_file(file_path, destination_path)
+        File.delete(attachment.path(attachment_style))
       end
+
+      update_attributes!(multi_drive_storage: storage_data)
     end
 
     define_method :download_from_storage! do |style|
