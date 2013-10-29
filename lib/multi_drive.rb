@@ -1,3 +1,7 @@
+module MultiDrive
+
+end
+
 require 'paperclip'
 require 'multi_drive/client'
 require 'multi_drive/attachment'

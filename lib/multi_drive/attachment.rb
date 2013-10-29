@@ -19,20 +19,24 @@ module MultiDrive::Attachment
           destination_path = attachment.url(attachment_style, false)
           destination_path = destination_path[0, destination_path.length - attachment_file_name.length]
           file_path = attachment.path(attachment_style)
-          storage_data[attachment_style.to_sym] = {
-            local: {
-              path: destination_path,
-              file_name: attachment_file_name
-            },
-            api: {
-              name: api_client.name,
-              path: destination_path,
-              file_name: attachment_file_name,
-              uploaded_at: Time.now
+          sha2 =  Digest::SHA2.file(file_path).hexdigest
+          if sha2 != storage_data.try(:[], [attachment_style.to_sym]).try(:[], :api).try(:sha2)
+            storage_data[attachment_style.to_sym] = {
+              local: {
+                path: destination_path,
+                file_name: attachment_file_name
+              },
+              api: {
+                name: api_client.name,
+                path: destination_path,
+                file_name: attachment_file_name,
+                sha2: sha2,
+                uploaded_at: Time.now
+              }
             }
-          }
-          api_client.upload_file(file_path, destination_path)
-          File.delete(attachment.path(attachment_style))
+            api_client.upload_file(file_path, destination_path)
+            File.delete(attachment.path(attachment_style))
+          end
         end
 
         update_attributes!(multi_drive_storage: storage_data)
