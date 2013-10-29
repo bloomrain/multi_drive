@@ -1,5 +1,6 @@
 require 'multi_drive/box_client'
 require 'multi_drive/skydrive_client'
+require 'multi_drive/mega_client'
 
 class MultiDrive::Client
   attr_accessor :available_clients, :current_client

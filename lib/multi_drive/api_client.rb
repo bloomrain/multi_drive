@@ -1,5 +1,5 @@
 class MultiDrive::ApiClient
-  attr_accessor :api, :config, :name, :api_key, :client_secret, :access_token, :refresh_token
+  attr_accessor :api, :config, :name, :api_key, :client_secret, :access_token, :refresh_token, :login, :password
   alias_method :client_id, :api_key
   def initialize(config)
     self.config = config.clone.with_indifferent_access
@@ -9,6 +9,8 @@ class MultiDrive::ApiClient
     self.client_secret = self.config[:client_secret]
     self.access_token = self.config[:access_token]
     self.refresh_token = self.config[:refresh_token]
+    self.login = self.config[:login]
+    self.password = self.config[:password]
   end
 
   def upload_file(file, destination_path)

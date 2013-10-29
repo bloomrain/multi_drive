@@ -34,6 +34,7 @@ Gem::Specification.new do |spec|
   spec.add_dependency 'google-api-client', "~> 0.5"
   spec.add_dependency 'ruby-box'
   spec.add_dependency 'google_drive'
+  spec.add_dependency 'rmega', '>= 0.1.4'
   #spec.add_dependency 'skydrive'
 
 
